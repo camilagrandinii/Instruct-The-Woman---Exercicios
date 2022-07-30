@@ -32,7 +32,8 @@ class Estudante(Pessoa):
         return super().falar_tipo()
 
 estudante = Estudante("Camila", "Ciencia da Computacao")
-estudante.falar_curso()
-estudante.falar_tipo()
-estudante.falar_oi()
+estudante.falar_tipo() 
+estudante.falar_oi() #herdado da classe mae
+estudante.falar_curso() #herdado da classe mae
+
     
