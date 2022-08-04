@@ -4,7 +4,7 @@ class Pessoa:
         self._atualizacoes = 0
     # getter
     @property
-    def nome1(self):
+    def nome1(self): # Mudando o nome de acesso ao atributo nome da classe
         return self._nome
     # setter de name
     @nome1.setter
@@ -18,7 +18,7 @@ class Pessoa:
         return self._atualizacoes
     def dizer_oi(self):
         print(f'Oi,{self.nome1}')
-        print(f'{self.nome1} teve seu nome alterado {self.atualizacoes} vezes')
+        print(f'{self.nome1} teve seu nome alterado {self.atualizacoes} vezes') # Aqui, se colocássemos nome daria erro
 
 maria = Pessoa('Maria')
 maria.dizer_oi()

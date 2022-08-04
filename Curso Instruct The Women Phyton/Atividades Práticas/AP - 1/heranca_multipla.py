@@ -24,6 +24,7 @@ def Framework(item):
     if isinstance(item, Logavel):
         mensagem = 'Boa noite, minhas queridas'
         item.logar(mensagem)
+        
 conexao_mysql = MySqlDataBase()
 Framework(conexao_mysql)
     

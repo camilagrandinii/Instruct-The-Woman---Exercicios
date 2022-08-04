@@ -27,15 +27,15 @@ class Estacionamento:
     def estado_do_estacionamento(self):
         return f'Vagas de Carro: {self.vagas_de_carro}, Vagas de Moto: {self.vagas_de_moto}, Carros para Vagas: {self.carro_para_vaga}, Motos para Vagas: {self.moto_para_vaga}, Total de Vagas Livres Moto: {self.total_vagas_livres_moto} e Total Vagas Livres Carro: {self.total_vagas_livres_carro}'
 
-
 class Veiculo:
     def __init__(self, placa, estacionado):
         self.__placa=placa
         self.estacionado=estacionado
         self.tipo=""
     
-    def estacionar():
-        print("estacionar")
+    def estacionar(self, carro):
+        if carro.estacionado:
+            raise ValueError(f'O carro {carro.placa} já está no estacionamento.')
     
     def sair_da_vaga():
         print("sair da vaga")
@@ -49,14 +49,19 @@ class Moto(Veiculo):
         self._tipo = "Moto"
         super().__init__(placa, estacionado)
 class Vaga:
+    idVaga=0
     def __init__(self):
-        self.id=0
+        self.idVaga
         self.tipo
         self.livre
         self.placa
 
-    def ocupar():
-        print("ocupad")
+    def ocupar(self, placa):
+        if self.livre:
+            self.placa=placa
+            self.livre=False
+        else:
+            raise ValueError(f'A vaga {self.identificador} já está ocupada')
     
-    def desocupar():
+    def desocupar(self, placa):
         print("desocupar")
