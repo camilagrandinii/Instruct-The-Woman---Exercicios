@@ -1,7 +1,7 @@
 #
-# Exercício Estacionamento - Instruct The Woman
-# @author - Camila Lacerda Grandini
-# 2022/2
+ # Exercício Estacionamento - Instruct The Woman
+ # @author - Camila Lacerda Grandini
+ # 2022/2
 #
 class Veiculo:
     def __init__(self, placa, estacionado):
@@ -10,7 +10,7 @@ class Veiculo:
         self.tipo = ""
 
     @property
-    def placa(self, placa):
+    def placa(self):
         print("getter de placa")
         return self.__placa
 
@@ -18,7 +18,7 @@ class Veiculo:
     def placa(self, valor):
         if not valor:
             raise ValueError()
-        self.__medida = valor
+        self.__placa = valor
 
     @property
     def estacionado(self):
@@ -42,30 +42,53 @@ class Carro(Veiculo):
     def __init__(self, placa, estacionado):
         super().__init__(placa, estacionado)
         self._tipo = "Carro"
+    
+    @property
+    def placa(self):
+        print("getter de placa")
+        return self.__placa
+
+    @placa.setter
+    def placa(self, valor):
+        if not valor:
+            raise ValueError()
+        self.__placa = valor
 
 
 class Moto(Veiculo):
     def __init__(self, placa, estacionado):
         super().__init__(placa, estacionado)
         self._tipo = "Moto"
+    
+    @property
+    def placa(self):
+        print("getter de placa")
+        return self.__placa
+
+    @placa.setter
+    def placa(self, valor):
+        if not valor:
+            raise ValueError()
+        self.__placa = valor
 
 
 class Vaga:
     def __init__(self, id, tipo):
-        self.__idVaga = id
+        self.id = id
         self.tipo = tipo
         self.livre = True
         self.placa = None
 
         if self.tipo != 'carro' and self.tipo != 'moto':
             raise ValueError(f'O tipo de vaga {tipo} não foi reconhecido')
+    def __str__(self):
+        return f'ID: {self.__id}, Tipo: {self.tipo}, Livre: {self._livre} e Placa: {self._placa}'
 
     def ocupar(self, placa, tipo):
         if self.livre:
             self.placa = placa
             self.tipo = tipo
             self.livre = False
-            self.inicializar_vagas(self)
         else:
             raise ValueError(f'A vaga {self.identificador} já está ocupada')
 
@@ -76,7 +99,37 @@ class Vaga:
             self.placa = None
             self.tipo = ""
             self.livre = True
+    
+    @property
+    def id(self):
+        print("getter de id")
+        return self.__id
 
+    @id.setter
+    def id(self, valor):
+        if not valor:
+            raise ValueError()
+        self.__id = valor
+    
+    @property
+    def livre(self):
+        print("getter de livre")
+        return self._livre
+
+    @livre.setter
+    def livre(self, valor):
+        if not valor:
+            raise ValueError()
+        self._livre= valor
+    
+    @property
+    def placa(self):
+        print("getter de placa")
+        return self._placa
+
+    @placa.setter
+    def placa(self, valor):
+        self._placa= valor
 
 class Estacionamento():
     def __init__(self, vagasCarro, vagasMoto):
@@ -94,18 +147,20 @@ class Estacionamento():
             self.estacionar_carro(veiculo)
         elif isinstance(veiculo, Moto):
             self.estacionar_moto(veiculo)
-
+        
     def estacionar_carro(self, carro: Carro):
         if self.total_vagas_livres_carro > 0:
             self.total_vagas_livres_carro -= 1
-            self.vagas_de_carro[0].ocupar(
-                carro.__placa, "carro")  # Teste para incluir carro na vaga
-            print(self.vagas_de_carro[0]
-                  )  # Teste para ver o que tem dentro de vagas_de_carro
+            for v in self.vagas_de_carro:
+                if v.livre:
+                    vagaLivre = v.__idVaga
+            self.vagas_de_carro[vagaLivre].ocupar(
+                carro.placa, "carro")  # Teste para incluir carro na vaga
+            print(self.vagas_de_carro[0])  # Teste para ver o que tem dentro de vagas_de_carro
             print("Carro estacionado")
         else:
             print("Não existem vagas disponíveis")
-
+    
     def estacionar_moto(self, moto: Moto):
         if self.total_vagas_livres_moto > 0:
             self.total_vagas_livres_moto -= 1
