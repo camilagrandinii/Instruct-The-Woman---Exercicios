@@ -11,7 +11,6 @@ class Veiculo:
 
     @property
     def placa(self):
-        print("getter de placa")
         return self.__placa
 
     @placa.setter
@@ -22,7 +21,6 @@ class Veiculo:
 
     @property
     def estacionado(self):
-        print("getter de estacionado")
         return self._estacionado
 
     @estacionado.setter
@@ -45,7 +43,6 @@ class Carro(Veiculo):
     
     @property
     def placa(self):
-        print("getter de placa")
         return self.__placa
 
     @placa.setter
@@ -62,7 +59,6 @@ class Moto(Veiculo):
     
     @property
     def placa(self):
-        print("getter de placa")
         return self.__placa
 
     @placa.setter
@@ -90,11 +86,11 @@ class Vaga:
             self.tipo = tipo
             self.livre = False
         else:
-            raise ValueError(f'A vaga {self.identificador} já está ocupada')
+            raise ValueError(f'A vaga {self.__id} já está ocupada')
 
     def desocupar(self):
         if self.livre:
-            raise ValueError(f'A vaga {self.identificador} já está desocupada')
+            raise ValueError(f'A vaga {self.__id} já está desocupada')
         else:
             self.placa = None
             self.tipo = ""
@@ -102,7 +98,6 @@ class Vaga:
     
     @property
     def id(self):
-        print("getter de id")
         return self.__id
 
     @id.setter
@@ -113,18 +108,14 @@ class Vaga:
     
     @property
     def livre(self):
-        print("getter de livre")
         return self._livre
 
     @livre.setter
     def livre(self, valor):
-        if not valor:
-            raise ValueError()
         self._livre= valor
     
     @property
     def placa(self):
-        print("getter de placa")
         return self._placa
 
     @placa.setter
@@ -135,28 +126,36 @@ class Estacionamento():
     def __init__(self, vagasCarro, vagasMoto):
         self.vagas_de_carro = []
         self.vagas_de_moto = []
-        self.total_vagas_livres_moto = 25
-        self.total_vagas_livres_carro = 25
+        self.total_vagas_livres_moto = vagasMoto
+        self.total_vagas_livres_carro = vagasCarro
         self.inicializar_vagas(vagasCarro, vagasMoto)
 
     def __str__(self):
-        return f'Vagas de Carro: {self.vagas_de_carro}, Vagas de Moto: {self.vagas_de_moto}, Carros para Vagas: {self.carro_para_vaga}, Motos para Vagas: {self.moto_para_vaga}, Total de Vagas Livres Moto: {self.total_vagas_livres_moto} e Total Vagas Livres Carro: {self.total_vagas_livres_carro}'
+        return f'Vagas de Carro: {self.vagas_de_carro}, Vagas de Moto: {self.vagas_de_moto}, Total de Vagas Livres Moto: {self.total_vagas_livres_moto} e Total Vagas Livres Carro: {self.total_vagas_livres_carro}'
 
     def estacionar_veiculo(self, veiculo: Veiculo):
         if isinstance(veiculo, Carro):
             self.estacionar_carro(veiculo)
         elif isinstance(veiculo, Moto):
             self.estacionar_moto(veiculo)
-        
+
+    def retirar_veiculo(self, veiculo: Veiculo):
+        if isinstance(veiculo, Carro):
+            self.remover_carro(veiculo)
+        elif isinstance(veiculo, Moto):
+            self.remover_moto(veiculo)
+
     def estacionar_carro(self, carro: Carro):
+        vagaLivre=0
         if self.total_vagas_livres_carro > 0:
             self.total_vagas_livres_carro -= 1
             for v in self.vagas_de_carro:
                 if v.livre:
-                    vagaLivre = v.__idVaga
+                    vagaLivre = v.id
+                    vagaLivre = int(vagaLivre[1:])-1
+                    break
             self.vagas_de_carro[vagaLivre].ocupar(
                 carro.placa, "carro")  # Teste para incluir carro na vaga
-            print(self.vagas_de_carro[0])  # Teste para ver o que tem dentro de vagas_de_carro
             print("Carro estacionado")
         else:
             print("Não existem vagas disponíveis")
@@ -164,30 +163,71 @@ class Estacionamento():
     def estacionar_moto(self, moto: Moto):
         if self.total_vagas_livres_moto > 0:
             self.total_vagas_livres_moto -= 1
-            self.moto_para_vaga.append(moto)
+            for v in self.vagas_de_moto:
+                if v.livre:
+                    vagaLivre = v.id
+                    vagaLivre = int(vagaLivre[1:])-1
+                    break
+            self.vagas_de_moto[vagaLivre].ocupar(
+                moto.placa, "moto")
+            print("Moto estacionada")
+
         elif self.total_vagas_livres_carro > 0:
             self.total_vagas_livres_carro -= 1
-            self.carro_para_vaga.append(moto)
+            for v in self.vagas_de_carro:
+                if v.livre:
+                    vagaLivre = v.id
+                    vagaLivre = int(vagaLivre[1:])-1
+                    break
+            self.vagas_de_carro[vagaLivre].ocupar(
+                moto.placa, "carro")
             print("Moto estacionada")
         else:
             print("Não existem vagas disponíveis")
-
+    
+    def placa_no_estacionamento_carro(self, placa):
+        for v in self.vagas_de_carro:
+            if placa==v.placa:
+                return True
+        return False
+    def placa_no_estacionamento_moto(self, placa):
+        for v in self.vagas_de_moto:
+            if placa==v.placa:
+                return True
+        return False
+        
     def remover_carro(self, carro: Carro):
-        self.carro_para_vaga.remove(carro.__placa)
+        if self.placa_no_estacionamento_carro(carro.placa):
+            for v in self.vagas_de_carro:
+                if v.placa==carro.placa:
+                    v.desocupar()
+        else:
+            print("O carro em questão não está no estacionamento")
         self.total_vagas_livres_carro += 1
         print("Carro removido")
 
     def remover_moto(self, moto: Moto):
-        if moto in self.moto_para_vaga:
-            self.moto_para_vaga.remove(moto.__placa)
+        if self.placa_no_estacionamento_moto(moto.placa):
+            for v in self.vagas_de_moto:
+                if v.placa==moto.placa:
+                    v.desocupar()
             self.total_vagas_livres_moto += 1
-        elif moto in self.carro_para_vaga:
-            self.carro_para_vaga.remove(moto.__placa)
+            print("Moto removida")
+        elif self.placa_no_estacionamento_carro(moto.placa):
+            for v in self.vagas_de_carro:
+                if v.placa==moto.placa:
+                    v.desocupar()
             self.total_vagas_livres_carro += 1
-        print("Moto removida")
+            print("Moto removida")
+        else:
+            print("A moto em questão não está no estacionamento")
 
     def estado_do_estacionamento(self):
-        return f'Vagas de Carro: {self.vagas_de_carro}, Vagas de Moto: {self.vagas_de_moto}, Carros para Vagas: {self.carro_para_vaga}, Motos para Vagas: {self.moto_para_vaga}, Total de Vagas Livres Moto: {self.total_vagas_livres_moto} e Total Vagas Livres Carro: {self.total_vagas_livres_carro}'
+        for v in self.vagas_de_carro:
+            print(v)
+        for v in self.vagas_de_moto:
+            print(v)
+        print(f'Total de Vagas Livres Moto: {self.total_vagas_livres_moto} e Total Vagas Livres Carro: {self.total_vagas_livres_carro}')
 
     def inicializar_vagas(self, vagasCarro, vagasMoto):
         self.vagas_de_carro = [
@@ -201,33 +241,36 @@ class Estacionamento():
 def main():
     opcao = 0
     estacionamento = Estacionamento(25, 25)
-    while opcao != 2:
-        opcao = int(input("MENU\n1 - Cadastrar Veículo\n2 - Sair\n"))
-        if opcao == 1:
+    while opcao != 4:
+        opcao = int(
+        input(
+            "\nMENU:\n1 - Estacionar Veículo\n2 - Remover Veículo\n3 - Estado do Estacionamento\n4 - Sair\n"
+        ))
+        if opcao == 1 or opcao == 2:
 
             placa = input("Digite a placa do seu veículo: ")
+
             tipo = int(input("\nSeu veículo é: \n1 - Carro\n2 - Moto\n"))
 
             if tipo == 1:
                 veiculo = Carro(placa, False)
             elif tipo == 2:
                 veiculo = Moto(placa, False)
-
-            opcao2 = int(
-                input(
-                    "\nVocê deseja estacionar seu veículo?\n1 - Sim\n2 - Não\n"
-                ))
-            if opcao2 == 1:
-                estacionamento.estacionar_veiculo(veiculo)
-            elif opcao2 == 2:
-                print("Saindo do programa...")
-                break
             else:
-                print("Opção inválida!!!")
+                print("Tipo inválido!!!")
 
-        elif opcao == 2:
+            if opcao == 1:
+                estacionamento.estacionar_veiculo(veiculo)
+            elif opcao == 2:
+                estacionamento.retirar_veiculo(veiculo)
+
+        elif opcao == 3:
+            estacionamento.estado_do_estacionamento()
+            
+        elif opcao == 4:
             print("Saindo do programa...")
             break
+
         else:
             print("Opção inválida!!!")
 
