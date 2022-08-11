@@ -40,7 +40,8 @@ class Cliente:
     def rendaMensal(self, rendaMensal):
         if not rendaMensal or not isinstance(rendaMensal, int):
             raise ValueError()
-        self._rendaMensal = rendaMensal
+        if self.rendaMensal<rendaMensal:
+            self._rendaMensal = rendaMensal
     
     def __str__(self):
         return f'Nome: {self._nome}, Telefone: {self.__telefone} e Renda Mensal: {self._rendaMensal}'
@@ -96,16 +97,21 @@ class Operacoes:
         self._tipo = tipo
 
 class ContaCorrente(Cliente):
-    def __init__(self, nome, telefone, rendaMensal):
-        super().__init__(nome, telefone, rendaMensal)
+    def __init__(self, nome, telefone, rendaMensal, titulares):
+        self._cliente = []
         self.__saldo = 0
         self._saques = []
         self._depositos = []
         self._chequeEpecial = rendaMensal
-
-    def __str__(self):
-        return f'Nome: {self._nome}, Saldo: {self.__saldo}, Valor Máximo do Cheque Especial: {self._chequeEpecial}'
+        self._titulares=titulares
+        self.inicializarCliente(nome, telefone, rendaMensal)         
     
+    def inicializarCliente(self, nome, telefone, rendaMensal):
+        cliente = Cliente(nome, telefone, rendaMensal)
+        self._cliente.append(cliente)
+        if self._chequeEpecial<rendaMensal:
+            self._chequeEpecial=rendaMensal
+
     def realizarSaque(self, valor, data, hora):
         operacao = Operacoes(valor, data, hora, "Saque")
         self._saques.append(operacao)
@@ -122,32 +128,51 @@ class ContaCorrente(Cliente):
         self.__saldo-=valor
     
     def listarOperacoes(self):
-        self.__str__()
         if not self._saques:
             print("A conta ainda não realizou nenhum saque!")
         else:
+            print("\n===== SAQUES =====")
             for op in self._saques:
                 print(op)
         if not self._depositos:
             print("A conta ainda não realizou nenhum depósito!")
         else:
+            print("\n===== DEPÓSITOS =====")
             for op in self._depositos:
                 print(op)
+    
+    def printarConta(self):
+        print(f'\nTitulares: {self._titulares}')
+        for cli in self._cliente:
+            print(cli)
+        print(f'Saldo: {self.__saldo}, Valor Máximo do Cheque Especial: {self._chequeEpecial}\n')
 
 def contaBanco():
-    nome = input("Bem Vindo ao Banco Delas! Por favor digite seu nome: ")
-    print(f"Olá {nome}, é ótimo tê-la conosco.")
+    print("\nBem Vindo ao Banco Delas, é ótimo tê-la(lo) conosco!")
     opcao = 0
 
     while opcao!=7:
-        opcao = int(input("\nDigite a opção desejada:\n1 - Abrir uma Conta\n2 - Realizar Saque\n3 - Realizar Depósito\n4 - Pedir Cheque Especial\n5 - Histórico de Operações da Conta\n6 - Consultar Infomações da Conta\n7 - Sair\n"))
+        opcao = int(input("Digite a opção desejada:\n1 - Abrir uma Conta\n2 - Realizar Saque\n3 - Realizar Depósito\n4 - Pedir Cheque Especial\n5 - Histórico de Operações da Conta\n6 - Consultar Infomações da Conta\n7 - Sair\n"))
         if opcao==1:
-            print("Por favor digite seus dados para que possamos criar sua conta devidamente. ")
-            nomeCompleto = input("Nome Completo: ")
-            telefone = input("Telefone: ")
-            rendaMensal = input("Renda Mensal: ")
+            print("\nPor favor digite seus dados para que possamos criar sua conta devidamente.")
+            titulares = int(input("Quantos serão os titulares da conta? Digite o número\n"))
 
-            contaCorrente1 = ContaCorrente(nomeCompleto, telefone, rendaMensal)
+            if titulares==1:
+                nomeCompleto = input(f"Nome Completo do titular: ")
+                telefone = input(f"Telefone do titular: ")
+                rendaMensal = input(f"Renda Mensal do titular: ")
+                contaCorrente1 = ContaCorrente(nomeCompleto, telefone, rendaMensal, titulares)
+
+            if titulares>1:
+                for i in range(titulares):
+                    nomeCompleto = input(f"Nome Completo do {i+1}o titular: ")
+                    telefone = input(f"Telefone do {i+1}o titular: ")
+                    rendaMensal = input(f"Renda Mensal do {i+1}o titular: ")
+                    if i==0:
+                        contaCorrente1 = ContaCorrente(nomeCompleto, telefone, rendaMensal, titulares)
+                    else:
+                        contaCorrente1.inicializarCliente(nomeCompleto, telefone, rendaMensal)
+
         elif opcao==2:
             if contaCorrente1:
                 valorSaque = int(input("Valor do Saque: "))
@@ -156,12 +181,15 @@ def contaBanco():
         elif opcao==3:
             if contaCorrente1:
                 valorDeposito = int(input("Valor do Depósito: "))
-                contaCorrente1.realizarSaque(valorDeposito, datetime.today().strftime('%Y-%m-%d'), datetime.today().strftime('%H:%M'))
+                contaCorrente1.realizarDeposito(valorDeposito, datetime.today().strftime('%Y-%m-%d'), datetime.today().strftime('%H:%M'))
         
         elif opcao==4:
             if contaCorrente1:
                 valorChequeEspecial = int(input("Valor do Cheque Especial: "))
-                contaCorrente1.pegarChequeEspecial(valorChequeEspecial, datetime.today().strftime('%Y-%m-%d'), datetime.today().strftime('%H:%M'))   
+                if valorChequeEspecial<contaCorrente1._chequeEpecial:
+                    contaCorrente1.pegarChequeEspecial(valorChequeEspecial, datetime.today().strftime('%Y-%m-%d'), datetime.today().strftime('%H:%M'))   
+                else:
+                    raise ValueError("Esse valor excede seu limite do cheque especial!!!")
         
         elif opcao==5:
             if contaCorrente1:
@@ -169,7 +197,7 @@ def contaBanco():
         
         elif opcao==6:
             if contaCorrente1:
-                print(contaCorrente1)
+                contaCorrente1.printarConta()
         
         elif opcao==7:
             print("Saindo do programa...\nObrigada e tenha um ótimo dia!")
